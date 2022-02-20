@@ -227,8 +227,9 @@ const DateRangePicker = ({
     if(!lang || lang === 'en') {
       dayjs.locale('en');
     }else {
-      import(`dayjs/locale/${lang}`)
-        .then(() => dayjs.locale(lang))
+      let module_name = `dayjs/locale/${lang}`;
+      import(`${module_name}`)
+        .then(module => dayjs.locale(lang))
         .catch(er => console.error(er.message));
     }
   }, [locale, dayjs]);
