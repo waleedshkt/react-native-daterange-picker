@@ -1,8 +1,6 @@
-import dayjs from 'dayjs';
+import dayjsDefault from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import isBetween from 'dayjs/plugin/isBetween';
-import localeData from "dayjs/plugin/localeData";
-
 import PropTypes from "prop-types";
 import React, { useState, useEffect, useCallback } from "react";
 import {
@@ -20,15 +18,12 @@ import { height, width } from "./modules";
 import chevronL from "./assets/chevronL.png";
 import chevronR from "./assets/chevronR.png";
 
-dayjs.extend(weekday);
-dayjs.extend(isBetween);
-dayjs.extend(localeData);
-
 const DateRangePicker = ({
-  locale, // default is 'en'
+  dayjs,
   startDate,
   endDate,
   onChange,
+  onCloseCallback,
   displayedDate,
   minDate,
   date,
@@ -60,6 +55,11 @@ const DateRangePicker = ({
   const [weeks, setWeeks] = useState([]);
   const [selecting, setSelecting] = useState(false);
   const [dayHeaders, setDayHeaders] = useState([]);
+  const _dayjs = dayjs || dayjsDefault;
+  
+  _dayjs.extend(weekday);
+  _dayjs.extend(isBetween);
+  
   const mergedStyles = {
     backdrop: {
       ...styles.backdrop,
@@ -95,10 +95,6 @@ const DateRangePicker = ({
     if (typeof open !== "boolean") onOpen();
   };
 
-  const _onClose = () => {
-    if (typeof open !== "boolean") onClose();
-  };
-
   const onOpen = () => {
     setIsOpen(true);
   };
@@ -111,17 +107,18 @@ const DateRangePicker = ({
         endDate: startDate,
       });
     }
+    if(onCloseCallback) onCloseCallback();
   };
 
   const previousMonth = () => {
     onChange({
-      displayedDate: dayjs(displayedDate).subtract(1, "months"),
+      displayedDate: dayjs(displayedDate).subtract(1, "month"),
     });
   };
 
   const nextMonth = () => {
     onChange({
-      displayedDate: dayjs(displayedDate).add(1, "months"),
+      displayedDate: dayjs(displayedDate).add(1, "month"),
     });
   };
 
@@ -147,18 +144,18 @@ const DateRangePicker = ({
       setSelecting(true);
       onChange({
         date: null,
-        startDate: dayjs(),
+        startDate: _dayjs(),
         endDate: null,
         selecting: true,
-        displayedDate: dayjs(),
+        displayedDate: _dayjs(),
       });
     } else {
       setSelecting(false);
       onChange({
-        date: dayjs(),
+        date: _dayjs(),
         startDate: null,
         endDate: null,
-        displayedDate: dayjs(),
+        displayedDate: _dayjs(),
       });
     }
   };
@@ -167,9 +164,9 @@ const DateRangePicker = ({
     setSelecting(false);
     onChange({
       date: null,
-      startDate: dayjs().startOf("week"),
-      endDate: dayjs().endOf("week"),
-      displayedDate: dayjs(),
+      startDate: _dayjs().startOf("week"),
+      endDate: _dayjs().endOf("week"),
+      displayedDate: _dayjs(),
     });
   };
 
@@ -177,15 +174,15 @@ const DateRangePicker = ({
     setSelecting(false);
     onChange({
       date: null,
-      startDate: dayjs().startOf("month"),
-      endDate: dayjs().endOf("month"),
-      displayedDate: dayjs(),
+      startDate: _dayjs().startOf("month"),
+      endDate: _dayjs().endOf("month"),
+      displayedDate: _dayjs(),
     });
   };
 
   const select = useCallback(
     (day) => {
-      let _date = dayjs(displayedDate);
+      let _date = _dayjs(displayedDate);
       _date.set("date", day);
       if (range) {
         if (selecting) {
@@ -212,7 +209,7 @@ const DateRangePicker = ({
         });
       }
     },
-    [dayjs, displayedDate, onChange, range, selecting, startDate]
+    [_dayjs, displayedDate, onChange, range, selecting, startDate]
   );
 
   useEffect(() => {
@@ -221,24 +218,12 @@ const DateRangePicker = ({
       else if (!open && isOpen) onClose();
     }
   }, [open]);
-  
-  useEffect(() => {
-    let lang = locale;
-    if(!lang || lang === 'en') {
-      dayjs.locale('en');
-    }else {
-      let module_name = `dayjs/locale/${lang}`;
-      import(`${module_name}`)
-        .then(module => dayjs.locale(lang))
-        .catch(er => console.error(er.message));
-    }
-  }, [locale, dayjs]);
 
   useEffect(() => {
     function populateHeaders() {
       let _dayHeaders = [];
       for (let i = 0; i <= 6; ++i) {
-        let day = dayjs(displayedDate).weekday(i).format("dddd").substr(0, 2);
+        let day = _dayjs(displayedDate).weekday(i).format("dddd").substr(0, 2);
         _dayHeaders.push(
           <Header
             key={`dayHeader-${i}`}
@@ -256,7 +241,7 @@ const DateRangePicker = ({
       let _weeks = [];
       let week = [];
       let daysInMonth = displayedDate.daysInMonth();
-      let startOfMonth = dayjs(displayedDate).set("date", 1);
+      let startOfMonth = _dayjs(displayedDate).set("date", 1);
       let offset = startOfMonth.weekday();
       week = week.concat(
         Array.from({ length: offset }, (x, i) => (
@@ -264,7 +249,7 @@ const DateRangePicker = ({
         ))
       );
       for (let i = 1; i <= daysInMonth; ++i) {
-        let _date = dayjs(displayedDate).set("date", i);
+        let _date = _dayjs(displayedDate).set("date", i);
         let _selected = selected(_date, startDate, endDate, date);
         let _disabled = disabled(_date, minDate, maxDate);
         week.push(
@@ -311,7 +296,7 @@ const DateRangePicker = ({
     startDate,
     endDate,
     date,
-    dayjs,
+    _dayjs,
     displayedDate,
     dayHeaderTextStyle,
     dayHeaderStyle,
@@ -347,7 +332,7 @@ const DateRangePicker = ({
       <View style={mergedStyles.backdrop}>
         <TouchableWithoutFeedback
           style={styles.closeTrigger}
-          onPress={_onClose}
+          onPress={onClose}
         >
           <View style={styles.closeContainer} />
         </TouchableWithoutFeedback>
@@ -434,6 +419,7 @@ DateRangePicker.defaultProps = {
 
 DateRangePicker.propTypes = {
   onChange: PropTypes.func.isRequired,
+  onCloseCallback: PropTypes.func,
   startDate: PropTypes.object,
   endDate: PropTypes.object,
   displayedDate: PropTypes.object,
@@ -450,7 +436,6 @@ DateRangePicker.propTypes = {
   buttonStyle: PropTypes.object,
   buttonContainerStyle: PropTypes.object,
   presetButtons: PropTypes.bool,
-  locale: PropTypes.string,
 };
 
 const styles = StyleSheet.create({
