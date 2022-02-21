@@ -188,8 +188,14 @@ Simply pass the desired locale as a prop.
 
 ```js
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";=
+import { StyleSheet, View, Text } from "react-native";
+import dayjs from 'dayjs';
+import localeData from 'dayjs/plugin/localeData';
+import 'dayjs/locale/de';
 import DateRangePicker from "react-native-daterange-picker";
+
+dayjs.extend(localeData);
+dayjs.locale('de');
 
 export default class App extends React.Component {
   constructor(props) {
@@ -217,7 +223,7 @@ export default class App extends React.Component {
           endDate={endDate}
           startDate={startDate}
           displayedDate={displayedDate}
-          locale="de"
+          dayjs={dayjs}
         >
           <Text>Click me!</Text>
         </DateRangePicker>
@@ -242,6 +248,7 @@ const styles = StyleSheet.create({
 | -------------------- | -------- | :-----------------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | open                 | boolean  |         no          |              | Prop to control calendar visibility state. Passing this prop will disable the default function for toggling visibility off/on by clicking the backdrop/click me button. |
 | onChange             | function |         yes         |              | Date change callback function.                                                                                                                                          |
+| onClose              | function |         no          |              | Date-picker close callback function.                                                                                                                                    |
 | startDate            | Dayjs    |  yes (if `range`)   |              | Value of the picked start date.                                                                                                                                         |
 | endDate              | DayJs    |  yes (if `range`)   |              | Value of the picked end date.                                                                                                                                           |
 | date                 | DayJs    | yes (if no `range`) |              | Value of the picked single date.                                                                                                                                        |
@@ -268,7 +275,7 @@ const styles = StyleSheet.create({
 | monthPrevButton      | Node     |         no          |              | Icon for previous button.                                                                                                                                               |
 | monthNextButton      | Node     |         no          |              | Icon for next button.                                                                                                                                                   |
 | monthButtonsStyle    | Object   |         no          |              | Styling for month prev/next buttons.                                                                                                                                    |
-| locale               | string   |         no          |    'en'      | Prop for setting custom locale.                                                                                                                                         |
+| dayjs                | DayJs    |         no          |              | Custom DayJs object. Useful for setting locale                                                                                                                                         |
 
 ## Questions & Suggestions
 
