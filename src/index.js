@@ -1,6 +1,7 @@
 import dayjsDefault from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import isBetween from 'dayjs/plugin/isBetween';
+
 import PropTypes from "prop-types";
 import React, { useState, useEffect, useCallback } from "react";
 import {
@@ -23,7 +24,7 @@ const DateRangePicker = ({
   startDate,
   endDate,
   onChange,
-  onCloseCallback,
+  onClose,
   displayedDate,
   minDate,
   date,
@@ -92,14 +93,10 @@ const DateRangePicker = ({
   };
 
   const _onOpen = () => {
-    if (typeof open !== "boolean") onOpen();
+    if (typeof open !== "boolean") setIsOpen(true);
   };
 
-  const onOpen = () => {
-    setIsOpen(true);
-  };
-
-  const onClose = () => {
+  const _onClose = () => {
     setIsOpen(false);
     setSelecting(false);
     if (!endDate) {
@@ -107,7 +104,7 @@ const DateRangePicker = ({
         endDate: startDate,
       });
     }
-    if(onCloseCallback) onCloseCallback();
+    if(onClose) onClose();
   };
 
   const previousMonth = () => {
@@ -214,8 +211,8 @@ const DateRangePicker = ({
 
   useEffect(() => {
     if (typeof open === "boolean") {
-      if (open && !isOpen) onOpen();
-      else if (!open && isOpen) onClose();
+      if (open && !isOpen) _onOpen();
+      else if (!open && isOpen) _onClose();
     }
   }, [open]);
 
@@ -332,7 +329,7 @@ const DateRangePicker = ({
       <View style={mergedStyles.backdrop}>
         <TouchableWithoutFeedback
           style={styles.closeTrigger}
-          onPress={onClose}
+          onPress={_onClose}
         >
           <View style={styles.closeContainer} />
         </TouchableWithoutFeedback>
