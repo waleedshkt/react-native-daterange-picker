@@ -93,7 +93,7 @@ const DateRangePicker = ({
   };
 
   const _onOpen = () => {
-    if (typeof open !== "boolean") setIsOpen(true);
+    setIsOpen(true);
   };
 
   const _onClose = () => {
